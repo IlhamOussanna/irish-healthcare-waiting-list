@@ -186,7 +186,7 @@ Based on the findings, three recommendations are proposed for the HSE and Depart
 
 ## Limitations
 
-- This analysis covers outpatient (OP) lists only — inpatient, day case and GI endoscopy data are not included
+- This analysis covers outpatient (OP) lists only inpatient, day case and GI endoscopy data are not included
 - Three specialties dropped out between 2023 and 2025, so full three-year comparisons are based on 58 consistent specialties
 - The data does not capture clinical urgency, patient outcomes, or the reason for each wait
 - NTPF spending and outsourcing volumes were not available in structured format and could not be included
