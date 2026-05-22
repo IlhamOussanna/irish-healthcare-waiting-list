@@ -216,4 +216,4 @@ All data is published openly by the NTPF under Ireland's Open Data policy.
 
 **Ilham Oussanna** — Data Analyst  
 🔗 [LinkedIn](https://www.linkedin.com/in/ilham-o-89372a274)
-*Project completed May 2026 | Tools: PostgreSQL · Power Query · Power BI | Data: NTPF Open Data*
+
