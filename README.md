@@ -4,7 +4,7 @@
 
 A data analytics project examining three years of real outpatient waiting list data from Irish public hospitals, using open data published by the National Treatment Purchase Fund (NTPF).
 
-![Dashboard Overview](Screenshot/Page1_The_Scale_of_the_Problem.png)
+![Dashboard Overview](Screenshots/Page1_The_Scale_of_the_Problem.png)
 
 ---
 
@@ -153,21 +153,21 @@ Five queries were written to answer five business questions. Each query builds o
 
 The Power BI dashboard has three pages, each answering a different question about the data.
 
-### Page 1 — The Scale of the Problem
+### Page 1 The Scale of the Problem
 Overall waiting list size, year-on-year trends, and the Adults vs Children breakdown of long-wait rates.
 
 ![Page 1 - The Scale of the Problem](Screenshots/Page1_The_Scale_of_the_Problem.png)
 
 ---
 
-### Page 2 — Where The Pressure Is
+### Page 2 Where The Pressure Is
 Top 10 specialties by volume, top 10 by severity, and an Adults vs Children comparison by specialty. Includes a year slicer to filter by 2023, 2024, or 2025.
 
 ![Page 2 - Where The Pressure Is](Screenshots/Page2_Where_The_Pressure_Is.png)
 
 ---
 
-### Page 3 — Is It Getting Better?
+### Page 3 Is It Getting Better?
 Monthly trend of 18+ month waiters across all 36 months, average % waiting over 12 months by month, and waiting list composition by year and time band.
 
 ![Page 3 - Is It Getting Better](Screenshots/Page3_Is_It_Getting_Better.png)
