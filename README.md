@@ -1,6 +1,6 @@
-# 🏥 Irish Healthcare Waiting List Analysis 2023–2025
+# Irish Healthcare Waiting List Analysis 2023–2025
 
-> **Is Ireland making real progress on its hospital waiting list crisis — and who is being left behind?**
+> **Is Ireland making real progress on its hospital waiting list crisis and who is being left behind?**
 
 A data analytics project examining three years of real outpatient waiting list data from Irish public hospitals, using open data published by the National Treatment Purchase Fund (NTPF).
 
@@ -8,21 +8,21 @@ A data analytics project examining three years of real outpatient waiting list d
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
-Ireland's hospital waiting list crisis is one of the most talked-about issues in Irish public life. This project goes beyond the headlines to analyse what is actually happening — who is waiting, how long they are waiting, whether things are getting better, and which patient groups are being left behind.
+Ireland's hospital waiting list crisis is one of the most talked-about issues in Irish public life. This project goes beyond the headlines to analyse what is actually happening who is waiting, how long they are waiting, whether things are getting better, and which patient groups are being left behind.
 
 Using 36 monthly snapshots from January 2023 to December 2025, this project covers over 2,920 records across 61 to 64 medical specialties for both adult and child patients. The analysis produces five connected findings and three policy-level recommendations.
 
 ---
 
-## 🎯 Key Findings
+## Key Findings
 
 | # | Finding |
 |---|---|
 | 1 | Overall patient demand grew to 7.2M records in 2025, even as long-wait rates improved year on year |
-| 2 | Orthopaedics, Dermatology and Cardiology carry the highest volume — but Neurology and Ophthalmology have the most severe backlogs |
-| 3 | Children are now proportionally worse off than adults for 18+ month waits — a reversal from 2023 |
+| 2 | Orthopaedics, Dermatology and Cardiology carry the highest volume but Neurology and Ophthalmology have the most severe backlogs |
+| 3 | Children are now proportionally worse off than adults for 18+ month waits a reversal from 2023 |
 | 4 | The 18+ month backlog fell by 55% between January 2023 and December 2024, then stalled throughout 2025 |
 | 5 | Oral Surgery (62.88%), Rheumatology Child (49.75%) and Clinical Genetics (46.52%) have the highest rates of critical long waiters |
 
@@ -65,10 +65,10 @@ irish-healthcare-waiting-list/
 
 ---
 
-## 📊 Dataset
+## Dataset
 
 - **Source:** [NTPF Open Data Portal](https://www.ntpf.ie/waiting-list-data/open-data/)
-- **Coverage:** Outpatient (OP) waiting lists by specialty — January 2023 to December 2025
+- **Coverage:** Outpatient (OP) waiting lists by speciality, January 2023 to December 2025
 - **Published:** Monthly on the second Friday of each month
 - **Total rows after combining:** 2,920
 - **Specialties consistently tracked:** 58 across all three years
@@ -78,7 +78,7 @@ irish-healthcare-waiting-list/
 | Column | Description |
 |---|---|
 | `archive_date` | Monthly snapshot date |
-| `adult_child` | Patient group — Adult or Child |
+| `adult_child` | Patient group Adult or Child |
 | `speciality` | Medical specialty name |
 | `wait_0_6m` | Patients waiting 0–6 months |
 | `wait_6_12m` | Patients waiting 6–12 months |
@@ -91,7 +91,7 @@ irish-healthcare-waiting-list/
 
 ---
 
-## 🧹 Data Cleaning Steps
+## Data Cleaning Steps
 
 All cleaning was done in Microsoft Power Query before loading into PostgreSQL:
 
@@ -104,7 +104,7 @@ All cleaning was done in Microsoft Power Query before loading into PostgreSQL:
 
 ---
 
-## 🗄️ Database Setup
+## Database Setup
 
 ```sql
 CREATE TABLE op_waiting_list (
@@ -135,7 +135,7 @@ CSV HEADER;
 
 ---
 
-## 💡 SQL Analysis
+## SQL Analysis
 
 Five queries were written to answer five business questions. Each query builds on the last, moving from a broad overview down to specific specialty-level insights. Full annotated SQL is in the `SQL/` folder.
 
@@ -143,13 +143,13 @@ Five queries were written to answer five business questions. Each query builds o
 |---|---|
 | 1 | How did total waiting lists and long-wait rates change year on year? |
 | 2 | Which adult specialties carry the highest volume and the most severe backlogs? |
-| 3 | Are adults or children waiting longer — and has this changed over time? |
+| 3 | Are adults or children waiting longer and has this changed over time? |
 | 4 | What does the full 36-month trend of 18+ month waiters look like? |
 | 5 | Which specialties have the highest proportion of patients in critical long-wait bands? |
 
 ---
 
-## 📈 Dashboard
+## Dashboard
 
 The Power BI dashboard has three pages, each answering a different question about the data.
 
@@ -174,33 +174,33 @@ Monthly trend of 18+ month waiters across all 36 months, average % waiting over 
 
 ---
 
-## 📋 Recommendations
+## Recommendations
 
 Based on the findings, three recommendations are proposed for the HSE and Department of Health:
 
-1. **Renew investment in the 18+ month backlog** — the 2025 plateau shows that current outsourcing levels are no longer enough to drive further reductions
-2. **Develop a dedicated paediatric waiting list strategy** — children are now proportionally worse off than adults, with eight of the fifteen most critical specialties being children's services
-3. **Adopt severity-weighted metrics** — the proportion waiting over 12 months is a more meaningful measure of patient harm than total list size alone
+1. **Renew investment in the 18+ month backlog** the 2025 plateau shows that current outsourcing levels are no longer enough to drive further reductions
+2. **Develop a dedicated paediatric waiting list strategy** children are now proportionally worse off than adults, with eight of the fifteen most critical specialties being children's services
+3. **Adopt severity-weighted metrics** the proportion waiting over 12 months is a more meaningful measure of patient harm than total list size alone
 
 ---
 
-## ⚠️ Limitations
+## Limitations
 
 - This analysis covers outpatient (OP) lists only — inpatient, day case and GI endoscopy data are not included
 - Three specialties dropped out between 2023 and 2025, so full three-year comparisons are based on 58 consistent specialties
 - The data does not capture clinical urgency, patient outcomes, or the reason for each wait
 - NTPF spending and outsourcing volumes were not available in structured format and could not be included
-- All data used is publicly available aggregate data — no individual patient data was accessed or used
+- All data used is publicly available aggregate data no individual patient data was accessed or used
 
 ---
 
-## 📄 Report
+## Report
 
 A full written report covering background, methodology, all five findings, recommendations and limitations is available in the `Report/` folder.
 
 ---
 
-## 🔗 Data Sources
+## Data Sources
 
 All data is published openly by the NTPF under Ireland's Open Data policy.
 
