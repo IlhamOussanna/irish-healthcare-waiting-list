@@ -214,6 +214,6 @@ All data is published openly by the NTPF under Ireland's Open Data policy.
 ---
 ## 👤 Author
 
-**Ilham Oussanna** — Data Analyst  
+**Ilham Oussanna** Data Analyst  
 🔗 [LinkedIn](https://www.linkedin.com/in/ilham-o-89372a274)
 
