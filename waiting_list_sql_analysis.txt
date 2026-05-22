@@ -1,0 +1,229 @@
+-- ============================================================
+-- Irish Healthcare Waiting List Analysis 2023-2025
+-- Author: Ilham
+-- Data Source: NTPF Open Data Portal (ntpf.ie)
+-- Tools: PostgreSQL 16, Power Query, Power BI
+-- Date: May 2026
+-- ============================================================
+-- This file contains:
+--   1. Table creation script
+--   2. Five analysis queries with explanations
+--   3. Results summary for each query
+-- ============================================================
+
+
+-- ------------------------------------------------------------
+-- STEP 1: CREATE THE TABLE
+-- ------------------------------------------------------------
+-- One table holds all three years of outpatient waiting list data.
+-- Data was cleaned in Power Query before import:
+--   - Dates converted from text to DATE type
+--   - Numeric columns stripped of comma formatting
+--   - year, month_num and pct_over_12m columns derived
+-- Total rows loaded: 2,920 (1,011 from 2023, 934 from 2024, 975 from 2025)
+-- ------------------------------------------------------------
+
+CREATE TABLE op_waiting_list (
+    id              SERIAL PRIMARY KEY,
+    archive_date    DATE NOT NULL,         -- Monthly snapshot date (end of month)
+    adult_child     VARCHAR(10) NOT NULL,  -- 'Adult' or 'Child'
+    speciality      VARCHAR(100) NOT NULL, -- Medical specialty name
+    wait_0_6m       INT NOT NULL,          -- Patients waiting 0-6 months
+    wait_6_12m      INT NOT NULL,          -- Patients waiting 6-12 months
+    wait_12_18m     INT NOT NULL,          -- Patients waiting 12-18 months
+    wait_18m_plus   INT NOT NULL,          -- Patients waiting 18+ months
+    total_waiting   INT NOT NULL,          -- Total patients on waiting list
+    year            INT NOT NULL,          -- Derived: 2023, 2024 or 2025
+    month_num       INT NOT NULL,          -- Derived: 1-12
+    pct_over_12m    NUMERIC(6,2)           -- Derived: % waiting over 12 months
+);
+
+
+-- ------------------------------------------------------------
+-- QUERY 1: Year on Year Overview
+-- ------------------------------------------------------------
+-- Business question: How did total waiting lists and long-wait
+-- rates change across the three years?
+--
+-- Key result:
+--   2023: 7,105,956 patients | 22.93% over 12 months
+--   2024: 7,027,520 patients | 17.74% over 12 months
+--   2025: 7,225,490 patients | 16.70% over 12 months
+--
+-- Finding: Long-wait rates are improving but overall demand
+-- is growing. Total patients rose again in 2025 after a dip
+-- in 2024, showing the system is treating long waiters faster
+-- but seeing more new patients each year.
+-- ------------------------------------------------------------
+
+SELECT
+    year,
+    SUM(total_waiting)                              AS total_patients,
+    SUM(wait_12_18m + wait_18m_plus)                AS total_over_12m,
+    ROUND(
+        SUM(wait_12_18m + wait_18m_plus) * 100.0
+        / SUM(total_waiting), 2
+    )                                               AS pct_over_12m
+FROM op_waiting_list
+GROUP BY year
+ORDER BY year;
+
+
+-- ------------------------------------------------------------
+-- QUERY 2: Top 10 Adult Specialties by Volume and Severity
+-- ------------------------------------------------------------
+-- Business question: Which adult specialties carry the highest
+-- volume, and which have the most severe long-wait backlogs?
+--
+-- Key result (top 3 by volume):
+--   Orthopaedics:  2,348,047 patients | 7.02% waiting 18m+
+--   Dermatology:   1,840,937 patients | 11.94% waiting 18m+
+--   Cardiology:    1,372,958 patients | 4.72% waiting 18m+
+--
+-- Key result (highest severity):
+--   Neurology:     808,470 patients   | 16.13% waiting 18m+
+--   Ophthalmology: 1,247,272 patients | 15.57% waiting 18m+
+--
+-- Finding: Volume and severity tell different stories.
+-- Orthopaedics is the busiest but has relatively controlled
+-- long waits. Neurology and Ophthalmology are smaller but
+-- have a much higher proportion of critically long waiters.
+-- ------------------------------------------------------------
+
+SELECT
+    speciality,
+    SUM(total_waiting)                              AS total_patients,
+    SUM(wait_18m_plus)                              AS total_18m_plus,
+    ROUND(
+        SUM(wait_18m_plus) * 100.0
+        / SUM(total_waiting), 2
+    )                                               AS pct_18m_plus
+FROM op_waiting_list
+WHERE adult_child = 'Adult'
+GROUP BY speciality
+ORDER BY total_patients DESC
+LIMIT 10;
+
+
+-- ------------------------------------------------------------
+-- QUERY 3: Adults vs Children
+-- ------------------------------------------------------------
+-- Business question: Are adults or children waiting longer,
+-- and has this changed over the three-year period?
+--
+-- Key result:
+--   Adult 2023: 13.40% | Adult 2024: 8.65% | Adult 2025: 7.32%
+--   Child 2023: 11.28% | Child 2024: 8.87% | Child 2025: 8.23%
+--
+-- Finding: In 2023 adults were proportionally worse off.
+-- By 2025 this had reversed -- children now have a higher
+-- rate of 18+ month waiters than adults. Both groups are
+-- improving, but children are improving more slowly.
+-- This is a health equity finding: delayed treatment in
+-- children affects development, education and long-term health
+-- in ways that are harder to reverse than in adults.
+-- ------------------------------------------------------------
+
+SELECT
+    adult_child,
+    year,
+    SUM(total_waiting)                              AS total_patients,
+    SUM(wait_18m_plus)                              AS total_18m_plus,
+    ROUND(
+        SUM(wait_18m_plus) * 100.0
+        / SUM(total_waiting), 2
+    )                                               AS pct_18m_plus
+FROM op_waiting_list
+GROUP BY adult_child, year
+ORDER BY adult_child, year;
+
+
+-- ------------------------------------------------------------
+-- QUERY 4: Monthly Trend with Running Total (Window Function)
+-- ------------------------------------------------------------
+-- Business question: What does the full 36-month trend of
+-- 18+ month waiters look like, and is progress still happening?
+--
+-- Key result (selected months):
+--   Jan 2023: 95,582 waiters | 16.21% of total
+--   Dec 2023: 55,304 waiters |  9.84% of total
+--   Dec 2024: 42,996 waiters |  7.72% of total
+--   Dec 2025: 44,151 waiters |  7.21% of total
+--
+-- Finding: Three distinct phases are visible in the data.
+--   Phase 1 (2023): Rapid improvement, backlog fell by ~40,000
+--   Phase 2 (2024): Continued but slowing improvement
+--   Phase 3 (2025): Plateau -- numbers stopped falling and
+--                   bounced between 43,000 and 47,000 all year
+--
+-- The running_total_18m_plus column shows the cumulative
+-- backlog accumulating across all 36 months.
+-- ------------------------------------------------------------
+
+SELECT
+    archive_date,
+    year,
+    month_num,
+    SUM(wait_18m_plus)                              AS total_18m_plus,
+    SUM(total_waiting)                              AS total_patients,
+    ROUND(
+        SUM(wait_18m_plus) * 100.0
+        / SUM(total_waiting), 2
+    )                                               AS pct_18m_plus,
+    SUM(SUM(wait_18m_plus)) OVER (
+        ORDER BY archive_date
+    )                                               AS running_total_18m_plus
+FROM op_waiting_list
+GROUP BY archive_date, year, month_num
+ORDER BY archive_date;
+
+
+-- ------------------------------------------------------------
+-- QUERY 5: Specialties with Highest Critical Wait Rates
+-- ------------------------------------------------------------
+-- Business question: Which specialties have the highest
+-- proportion of patients waiting over 12 months, and does
+-- this differ between adults and children?
+--
+-- Filter: Only specialties with more than 10,000 total
+-- patients (to avoid small-volume distortions)
+--
+-- Key result (top 5):
+--   Oral Surgery (Adult):              62.88% over 12 months
+--   Rheumatology (Child):              49.75% over 12 months
+--   Clinical (Medical) Genetics (Adult): 46.52% over 12 months
+--   Endocrinology (Adult):             35.12% over 12 months
+--   Neurosurgery (Adult):              34.24% over 12 months
+--
+-- Finding: 8 of the top 15 most critical specialties are
+-- children's services. This directly supports Finding 3 --
+-- children are being disproportionately left behind,
+-- particularly in Rheumatology, Paediatric Dermatology,
+-- Paed Orthopaedics and Developmental Paediatrics.
+--
+-- Oral Surgery at 62.88% means nearly 2 in 3 adult oral
+-- surgery patients have been waiting more than a year --
+-- the single most alarming figure in the entire dataset.
+-- ------------------------------------------------------------
+
+SELECT
+    speciality,
+    adult_child,
+    ROUND(AVG(pct_over_12m), 2)                     AS avg_pct_over_12m,
+    SUM(wait_18m_plus)                              AS total_18m_plus,
+    SUM(total_waiting)                              AS total_patients
+FROM op_waiting_list
+GROUP BY speciality, adult_child
+HAVING SUM(total_waiting) > 10000
+ORDER BY avg_pct_over_12m DESC
+LIMIT 15;
+
+
+-- ============================================================
+-- END OF ANALYSIS
+-- ============================================================
+-- Full findings, recommendations and limitations are documented
+-- in the written report: Irish_Healthcare_Waiting_List_Report.docx
+-- Dashboard: Irish_Healthcare_Waiting_List.pbix (Power BI)
+-- Data source: https://www.ntpf.ie/waiting-list-data/open-data/
+-- ============================================================
